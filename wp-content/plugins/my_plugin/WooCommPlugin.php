@@ -50,7 +50,62 @@ class WooCommPlugin
 		$this->plugin_basename = plugin_basename(__FILE__);
 
 		$this->define( 'WooCommPlugin_VERSION', $this->version );
+
+		add_action( 'init' , array( $this , 'custom_post_type' ) );
+	}
+
+	/**
+	 * Define constant if not already set
+	 * @param  string $name
+	 * @param  string|bool $value
+	 */
+	private function define( $name, $value ) {
+		if ( ! defined( $name ) ) {
+			define( $name, $value );
+		}
+	}
+
+	/**
+	* Function for activation.
+	*/
+	function activation()
+	{
+		//custom post type for fail-safe
+		$this->custom_post_type();
+		//flush rewrite rules.
+		flush_rewrite_rules();
+	}
+
+	/**
+	* Function for deactivation.
+	*/
+	function deactivation()
+	{
+		//flush rewrite rules.
+		flush_rewrite_rules();
+	}
+
+	/**
+	* Function for uninstall.
+	*/
+	function uninstall()
+	{
+		
+	}
+
+	/**
+	* Function for custom post type.
+	*/
+	function custom_post_type()
+	{
+		register_post_type('book',  ['public' => true, 'label' =>'Books'] );
 	}
 }
+
+// activation
+register_activation_hook( __FILE__ , array( WooCommPlugin::instance(),'activation' ) );
+
+// deactivation
+register_deactivation_hook( __FILE__ , array( WooCommPlugin::instance(),'deactivation' ) );
 
 endif;
