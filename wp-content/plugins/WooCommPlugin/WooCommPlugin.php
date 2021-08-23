@@ -51,6 +51,7 @@ class WooCommPlugin
 
 		$this->define( 'WooCommPlugin_VERSION', $this->version );
 
+		add_action( 'init' , array( $this , 'create_custom_post' ) );
 		add_action( 'init' , array( $this , 'custom_post_type' ) );
 	}
 
@@ -98,7 +99,73 @@ class WooCommPlugin
 	*/
 	function custom_post_type()
 	{
+		
+
 		register_post_type('book',  ['public' => true, 'label' =>'Books'] );
+
+		$labels = array(
+			'name' => _x( 'type', 'taxonomy general name' ),
+			'singular_name' => _x( 'type', 'taxonomy singular name' ),
+			'search_items' =>  __( 'Search Subjects' ),
+			'all_items' => __( 'All Subjects' ),
+			'parent_item' => __( 'Parent Subject' ),
+			'parent_item_colon' => __( 'Parent Subject:' ),
+			'edit_item' => __( 'Edit Subject' ), 
+			'update_item' => __( 'Update Subject' ),
+			'add_new_item' => __( 'Add New Subject' ),
+			'new_item_name' => __( 'New Subject Name' ),
+			'menu_name' => __( 'Type' ),
+		  );    
+		 
+		// Now register the taxonomy
+		  register_taxonomy('type',array('tests1'), array(
+			'hierarchical' => true,
+			'labels' => $labels,
+			'show_ui' => true,
+			'show_in_rest' => true,
+			'show_admin_column' => true,
+			'query_var' => true,
+			'rewrite' => array( 'slug' => 'type' ),
+		  ));
+	}
+
+	function create_custom_post()
+	{
+		$labels = array(
+			'name' => 'Tests1',
+			'singular_name' => 'Test1',
+			'add_new' => 'Add new item',
+			'all items' => 'All Items',
+			'add_new_items' => 'Add Item',
+			'edit_item' => 'Edit Item',
+			'new_item' => 'New Item',
+			'view_item' => 'View Item',
+			'search_item' => 'Search Item',
+			'not_found' => 'No Items found',
+			'not_found_in_trash' => 'No Items found in trash',
+			'parent_item_colon' => 'Parent Item'
+		);
+		$args = array(
+			'labels' => $labels,
+			'public' => true,
+			'has_archive' => true,
+			'publicly_queryable' => true,
+			'query_var' => true,
+			'rewrite' => true,
+			'capability_type' => 'post',
+			'hierarchial' => false,
+			'supports' => array(
+				'title',
+				'editor',
+				'excerpt',
+				'thumbnail',
+				'revisions'
+			),
+			'taxonomies' => array( 'category', 'post_tag'),
+			'menu_position' => 5,
+			'exclude_from_search' => false
+			);
+		register_post_type( 'tests1', $args );
 	}
 }
 
