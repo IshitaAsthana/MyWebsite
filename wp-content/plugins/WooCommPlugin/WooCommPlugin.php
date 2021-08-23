@@ -27,6 +27,7 @@ class WooCommPlugin
 {
 	public $version = '2.9.3';
 	public $plugin_basename;
+	public $submenus;
 
 	protected static $_instance = null;
 
@@ -54,9 +55,30 @@ class WooCommPlugin
 		$this->define( 'WooCommPlugin_VERSION', $this->version );
 
 		add_action( 'plugins_loaded', array( $this, 'load_classes' ) );
-		// add_action( 'init' , array( $this , 'create_custom_post' ) );
+		add_action( 'admin_menu', array( $this, 'load_menus' ), 999 ); 
+		// add_action( 'admin_menu' , array( $this , 'test_menu' ), 999 );
+
 		// add_action( 'init' , array( $this , 'custom_post_type' ) );
 	}
+
+	// public function test_menu() 
+    // {
+	// 	$parent_slug = 'woocommerce';
+		
+	// 	$this->options_page_hook = add_submenu_page(
+	// 		$parent_slug,
+	// 		'WooTest',
+	// 		'WooTest',
+	// 		'manage_options',
+	// 		'woocommplugin_test_submenu',
+	// 		array($this,'woocomm_test_data')
+	// 	);
+	// }
+	
+	// function woocomm_test_data()
+	// {
+	// 	echo 'HI';
+	// }
 
 	/**
 	 * Define constant if not already set
@@ -95,7 +117,8 @@ class WooCommPlugin
 	 */
 	public function includes() 
 	{
-
+		$this->$submenus = include_once( plugin_dir_path( __FILE__ ) . '/includes/WooCommPlugin_submenus.php' );
+		// include($this->plugin_path() . '/includes/WooCommPlugin_submenus.php' );
 	}
 
 	
@@ -122,6 +145,14 @@ class WooCommPlugin
 		$this->includes();
 	}
 
+	/**
+	 * Loads all the sub menus.
+	 */
+	public function load_menus() 
+    {
+		$this->$submenus->tnc_menu();
+	}
+	
 	/**
 	 * Check if woocommerce is activated
 	 */
