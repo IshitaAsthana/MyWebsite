@@ -3,16 +3,18 @@
  * @package WooCommPlugin
  * @version 1.0.0
  */
- /*
-Plugin Name: WooCommPlugin
-Plugin URI: http://wordpress.org/plugins/my_plugin/my_plugin/
-Description: This is a test sample of the Plugin to be created in future supporting woocommerce websites.
-Author: Ishita Asthana
-Version: 1.0.0
-*/
 
-/*
-*/
+/**
+ * Plugin Name: WooCommPlugin
+ * Plugin URI: http://wordpress.org/plugins/my_plugin/my_plugin/
+ * Description: This is a test sample of the Plugin to be created in future supporting woocommerce websites.
+ * Author: Ishita Asthana
+ * Version: 1.0.0
+ */
+
+ /**
+  * Lisence.
+  */
 
 if ( ! defined( 'ABSPATH') ) 
 {
@@ -51,8 +53,9 @@ class WooCommPlugin
 
 		$this->define( 'WooCommPlugin_VERSION', $this->version );
 
-		add_action( 'init' , array( $this , 'create_custom_post' ) );
-		add_action( 'init' , array( $this , 'custom_post_type' ) );
+		add_action( 'plugins_loaded', array( $this, 'load_classes' ) );
+		// add_action( 'init' , array( $this , 'create_custom_post' ) );
+		// add_action( 'init' , array( $this , 'custom_post_type' ) );
 	}
 
 	/**
@@ -71,10 +74,11 @@ class WooCommPlugin
 	*/
 	function activation()
 	{
+		require_once plugin_dir_path( __FILE__ ) . 'includes/WooCommPlugin_activator.php';
+		WooCommPlugin_Activator::activate();
+		
 		//custom post type for fail-safe
-		$this->custom_post_type();
-		//flush rewrite rules.
-		flush_rewrite_rules();
+		// $this->custom_post_type();
 	}
 
 	/**
@@ -82,90 +86,85 @@ class WooCommPlugin
 	*/
 	function deactivation()
 	{
-		//flush rewrite rules.
-		flush_rewrite_rules();
+		require_once plugin_dir_path( __FILE__ ) . 'includes/WooCommPlugin_deactivator.php';
+		WooCommPlugin_Deactivator::deactivate();		
 	}
 
 	/**
-	* Function for uninstall.
-	*/
-	function uninstall()
+	 * Load the main plugin classes and functions
+	 */
+	public function includes() 
 	{
-		
+
+	}
+
+	
+	/**
+	 * Instantiate classes when woocommerce is activated
+	 */
+	public function load_classes() {
+		if ( $this->is_woocommerce_activated() === false ) {
+			add_action( 'admin_notices', array ( $this, 'need_woocommerce' ) );
+			return;
+		}
+
+		if ( version_compare( PHP_VERSION, '5.6', '<' ) ) {
+			add_action( 'admin_notices', array ( $this, 'required_php_version' ) );
+			return;
+		}
+
+		if ( has_filter( 'wpo_wcpdf_pdf_maker' ) === false && version_compare( PHP_VERSION, '7.1', '<' ) ) {
+			add_filter( 'wpo_wcpdf_document_is_allowed', '__return_false', 99999 );
+			add_action( 'admin_notices', array ( $this, 'required_php_version' ) );
+		}
+
+		// all systems ready - GO!
+		$this->includes();
 	}
 
 	/**
-	* Function for custom post type.
-	*/
-	function custom_post_type()
-	{
-		
+	 * Check if woocommerce is activated
+	 */
+	public function is_woocommerce_activated() {
+		$blog_plugins = get_option( 'active_plugins', array() );
+		$site_plugins = is_multisite() ? (array) maybe_unserialize( get_site_option('active_sitewide_plugins' ) ) : array();
 
-		register_post_type('book',  ['public' => true, 'label' =>'Books'] );
-
-		$labels = array(
-			'name' => _x( 'type', 'taxonomy general name' ),
-			'singular_name' => _x( 'type', 'taxonomy singular name' ),
-			'search_items' =>  __( 'Search Subjects' ),
-			'all_items' => __( 'All Subjects' ),
-			'parent_item' => __( 'Parent Subject' ),
-			'parent_item_colon' => __( 'Parent Subject:' ),
-			'edit_item' => __( 'Edit Subject' ), 
-			'update_item' => __( 'Update Subject' ),
-			'add_new_item' => __( 'Add New Subject' ),
-			'new_item_name' => __( 'New Subject Name' ),
-			'menu_name' => __( 'Type' ),
-		  );    
-		 
-		// Now register the taxonomy
-		  register_taxonomy('type',array('tests1'), array(
-			'hierarchical' => true,
-			'labels' => $labels,
-			'show_ui' => true,
-			'show_in_rest' => true,
-			'show_admin_column' => true,
-			'query_var' => true,
-			'rewrite' => array( 'slug' => 'type' ),
-		  ));
+		if ( in_array( 'woocommerce/woocommerce.php', $blog_plugins ) || isset( $site_plugins['woocommerce/woocommerce.php'] ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	function create_custom_post()
-	{
-		$labels = array(
-			'name' => 'Tests1',
-			'singular_name' => 'Test1',
-			'add_new' => 'Add new item',
-			'all items' => 'All Items',
-			'add_new_items' => 'Add Item',
-			'edit_item' => 'Edit Item',
-			'new_item' => 'New Item',
-			'view_item' => 'View Item',
-			'search_item' => 'Search Item',
-			'not_found' => 'No Items found',
-			'not_found_in_trash' => 'No Items found in trash',
-			'parent_item_colon' => 'Parent Item'
-		);
-		$args = array(
-			'labels' => $labels,
-			'public' => true,
-			'has_archive' => true,
-			'publicly_queryable' => true,
-			'query_var' => true,
-			'rewrite' => true,
-			'capability_type' => 'post',
-			'hierarchial' => false,
-			'supports' => array(
-				'title',
-				'editor',
-				'excerpt',
-				'thumbnail',
-				'revisions'
-			),
-			'taxonomies' => array( 'category', 'post_tag'),
-			'menu_position' => 5,
-			'exclude_from_search' => false
-			);
-		register_post_type( 'tests1', $args );
+	/**
+	 * WooCommerce not active notice.
+	 *
+	 * @return string Fallack notice.
+	 */
+	public function need_woocommerce() {
+		/* translators: <a> tags */
+		$error = sprintf( __( 'WooCommPlugin requires %1$sWooCommerce%2$s to be installed & activated!' , 'woocommplugin' ), '<a href="http://wordpress.org/extend/plugins/woocommerce/">', '</a>' );
+		
+		$message = '<div class="error"><p>' . $error . '</p></div>';
+	
+		echo $message;
+	}
+
+	
+	/**
+	 * PHP version requirement notice
+	 */
+	public function required_php_version() {
+		$error_message	= __( 'WooCommPlugin requires PHP 7.1 (7.4 or higher recommended).', 'woocommplugin' );
+		/* translators: <a> tags */
+		$php_message	= __( 'We strongly recommend to %1$supdate your PHP version%2$s.', 'woocommplugin' );
+		
+		$message = '<div class="error">';
+		$message .= sprintf( '<p>%s</p>', $error_message );
+		$message .= sprintf( '<p>'.$php_message.'</p>', '<a href="https://docs.wpovernight.com/general/how-to-update-your-php-version/" target="_blank">', '</a>' );
+		$message .= '</div>';
+
+		echo $message;
 	}
 }
 
