@@ -150,7 +150,7 @@ class WooCommPlugin
 	 */
 	public function load_menus() 
     {
-		$this->$submenus->tnc_menu();
+		$this->$submenus->store_policies();
 	}
 	
 	/**

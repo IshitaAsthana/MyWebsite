@@ -24,36 +24,41 @@ class Submenus
 
     function _construct()
     {
-        // echo("Hey");
+		// include settings classes
+		$this->TnC = include( 'WooCommPlugin_TnC_submenu.php' );
+		
 		// T&C menu item
-		add_action( 'admin_menu', array( $this, 'tnc_menu' ) ); // Add menu
+		add_action( 'admin_menu', array( $this, 'store_policies' ) ); // Add menu
+
+		$this->general_settings	= get_option('woocommplugin_store_policies_TnC');
+		
     }
     
-	public function tnc_menu() 
+	public function store_policies() 
     {
 		$parent_slug = 'woocommerce';
 		
 		$this->options_page_hook = add_submenu_page(
 			$parent_slug,
-			'T&C',
-			'T&C',
+			'Store Policies',
+			'Store Policies',
 			'manage_woocommerce',
-			'woocommplugin_tnc_submenu',
+			'woocommplugin_store_policies_submenu',
             array($this,'submenu_page_callback')
 		);
 	}
     
     public function submenu_page_callback() {
-        echo '<input type="text" id="homepage_text" name="homepage_text" value="%s" />' ;
-        echo '<div class="wrap">
-	<h1>My Page Settings</h1>
-	<form method="post" action="options.php">';
-			
-		settings_fields( 'misha_settings' ); // settings group name
-		do_settings_sections( 'misha-slug' ); // just a page slug
-		submit_button();
+		$settings_tabs = apply_filters( 'wpo_wcpdf_settings_tabs', array (
+				'TnC'	=> __('Trems and Conditions', 'woocommplugin' ),
+				'Refund Policy'	=> __('Refund Policy', 'woocommplugin' ),
+			)
+		);
+		
+		$active_tab = isset( $_GET[ 'tab' ] ) ? sanitize_text_field( $_GET[ 'tab' ] ) : 'TnC';
+		$active_section = isset( $_GET[ 'section' ] ) ? sanitize_text_field( $_GET[ 'section' ] ) : '';
 
-	echo '</form></div>';
+		include('views/Store_Policies.php');
     }
 }
 
