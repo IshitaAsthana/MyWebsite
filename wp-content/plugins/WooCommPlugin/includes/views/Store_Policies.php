@@ -24,11 +24,13 @@ defined( 'ABSPATH' ) or exit;
 		<?php
 			do_action( 'woocommplugin_store_policies_page', $active_tab, $active_section );
 			if ( has_action( 'woocommplugin_store_policies_page_'.$active_tab )) {
+				
 				do_action( 'woocommplugin_store_policies_page_'.$active_tab, $active_section );
+				
 			} else {
 				
 				do_action( 'woocommplugin_store_policies_page_'.$active_tab, $active_section );
-				echo($active_tab);
+				
 				submit_button();
 			}
 		?>

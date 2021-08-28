@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( !class_exists( 'WooCommPlugin\\Submenu\\WooCommPlugin_TnC_submenu' ) ) :
+if ( !class_exists( 'WooCommPlugin\\WooCommPlugin_TnC_submenu' ) ) :
 
 class WooCommPlugin_TnC_submenu {
 
@@ -15,7 +15,7 @@ class WooCommPlugin_TnC_submenu {
 		
 		// add_action( 'admin_init', array( $this, 'init_settings' ) );
 		add_action( 'woocommplugin_store_policies_page_TnC', array( $this, 'TnC' ), 10, 1 );
-		add_action( 'woocommplugin_store_policies_page_Refund_Policy', array( $this, 'Refund_Policy' ), 11, 1 );
+		
 	}
 
 	public function TnC( $section ) {
@@ -23,12 +23,6 @@ class WooCommPlugin_TnC_submenu {
 		// do_settings_sections( $this->option_name );
 		
 		include('views\TnC_page.php');
-		submit_button();
-	}
-
-	public function Refund_Policy()
-	{
-		include('veiws\Refund_Policy.php');
 		submit_button();
 	}
 

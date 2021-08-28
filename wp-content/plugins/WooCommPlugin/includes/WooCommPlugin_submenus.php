@@ -30,7 +30,7 @@ class Submenus
     {
 		// include settings classes
 		$this->TnC = include( 'WooCommPlugin_TnC_submenu.php' );
-		$this->Rrefund = include( 'WooCommPlugin_Refund_submenu.php');
+		$this->Refund = include( 'WooCommPlugin_Refund_Policy_submenu.php');
 
 		echo('Hello constructor ');
 		// T&C menu item
