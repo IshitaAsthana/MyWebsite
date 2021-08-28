@@ -1,34 +1,42 @@
 <?php
-namespace WooCommPlugin\\Submenu;
+namespace WooCommPlugin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( !class_exists( 'WooCommPlugin\\Submenu\\Settings_General' ) ) :
+if ( !class_exists( 'WooCommPlugin\\Submenu\\WooCommPlugin_TnC_submenu' ) ) :
 
-class Settings_General {
+class WooCommPlugin_TnC_submenu {
 
 	protected $option_name = 'woocommplugin_store_policies_TnC';
 
 	function __construct()	{
-		add_action( 'admin_init', array( $this, 'init_settings' ) );
-		add_action( 'woocommplugin_store_policies_output_TnC', array( $this, 'output' ), 10, 1 );
-		add_action( 'woocommplugin_before_store_policies', array( $this, 'attachment_settings_hint' ), 10, 2 );
+		
+		// add_action( 'admin_init', array( $this, 'init_settings' ) );
+		add_action( 'woocommplugin_store_policies_page_TnC', array( $this, 'TnC' ), 10, 1 );
+		add_action( 'woocommplugin_store_policies_page_Refund_Policy', array( $this, 'Refund_Policy' ), 11, 1 );
 	}
 
-	public function output( $section ) {
-		settings_fields( $this->option_name );
-		do_settings_sections( $this->option_name );
+	public function TnC( $section ) {
+		// settings_fields( $this->option_name );
+		// do_settings_sections( $this->option_name );
+		
+		include('views\TnC_page.php');
+		submit_button();
+	}
 
+	public function Refund_Policy()
+	{
+		include('veiws\Refund_Policy.php');
 		submit_button();
 	}
 
 	public function init_settings() {
 		$page = $option_group = $option_name = $this->option_name;
 
-		$template_base_path = ( defined( 'WC_TEMPLATE_PATH' ) ? WC_TEMPLATE_PATH : $GLOBALS['woocommerce']->template_url );
-		$theme_template_path = get_stylesheet_directory() . '/' . $template_base_path;
+		// $template_base_path = ( defined( 'WC_TEMPLATE_PATH' ) ? WC_TEMPLATE_PATH : $GLOBALS['woocommerce']->template_url );
+		// $theme_template_path = get_stylesheet_directory() . '/' . $template_base_path;
 		$wp_content_dir = str_replace( ABSPATH, '', WP_CONTENT_DIR );
 		// $theme_template_path = substr($theme_template_path, strpos($theme_template_path, $wp_content_dir)) . 'pdf/yourtemplate';
 		// $plugin_template_path = "{$wp_content_dir}/plugins/woocommplugin/templates/Simple";
@@ -63,8 +71,8 @@ class Settings_General {
 				'section'	=> 'general_settings',
 				'args'		=> array(
 					'option_name'	=> $option_name,
-					'id'			=> 'template_path',
-					'options' 		=> $this->find_templates(),
+					'id'			=> 'template_path'//,
+					// 'options' 		=> $this->find_templates(),
 					/* translators: 1,2. template paths */
 					// 'description'	=> sprintf( __( 'Want to use your own template? Copy all the files from <code>%1$s</code> to your (child) theme in <code>%2$s</code> to customize them' , 'woocommplugin' ), $plugin_template_path, $theme_template_path),
 				)
@@ -131,7 +139,7 @@ class Settings_General {
 					'id'							=> 'header_logo',
 					'uploader_title'				=> __( 'Select or upload your invoice header/logo', 'woocommplugin' ),
 					'uploader_button_text'			=> __( 'Set image', 'woocommplugin' ),
-					'remove_button_text'			=> __( 'Remove image', 'woocommplugin' ),
+					'remove_button_text'			=> __( 'Remove image', 'woocommplugin' )//,
 					//'description'					=> __( '...', 'woocommplugin' ),
 				)
 			),
@@ -325,4 +333,4 @@ class Settings_General {
 
 endif; // class_exists
 
-return new Settings_General();
+return new WooCommPlugin_TnC_submenu();

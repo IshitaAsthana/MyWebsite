@@ -1,4 +1,8 @@
-<?php defined( 'ABSPATH' ) or exit; ?>
+<?php 
+
+defined( 'ABSPATH' ) or exit;
+
+?>
 <script type="text/javascript">
 	jQuery( function( $ ) {
 		$("#footer-thankyou").html("If you like <strong>WooCommPlugin</strong> please leave us a <a href='#'>★★★★★</a> rating. A huge thank you in advance!");
@@ -16,26 +20,17 @@
 	?>
 	</h2>
 
-	<?php
-		do_action( 'woocommplugin_before_store_policies_page', $active_tab, $active_section );
-	?>
-
 	<form method="post" action="options.php" id="woocommplugin_store_policies" class="<?php echo "{$active_tab} {$active_section}"; ?>">
 		<?php
-			do_action( 'woocommplugin_before_store_policies', $active_tab, $active_section );
-			if ( has_action( 'woocommplugin_store_policies_output_'.$active_tab ) ) {
-				echo('Has action');
-				do_action( 'woocommplugin_store_policies_output_'.$active_tab, $active_section );
+			do_action( 'woocommplugin_store_policies_page', $active_tab, $active_section );
+			if ( has_action( 'woocommplugin_store_policies_page_'.$active_tab )) {
+				do_action( 'woocommplugin_store_policies_page_'.$active_tab, $active_section );
 			} else {
-				echo('Does not have actionn'.'woocommplugin_store_policies_output_'.$active_tab.$active_section);
-				// legacy settings
-				settings_fields( "woocommplugin_{$active_tab}_store_policies" );
-				do_settings_sections( "woocommplugin_{$active_tab}_store_policies" );
-
+				
+				do_action( 'woocommplugin_store_policies_page_'.$active_tab, $active_section );
+				echo($active_tab);
 				submit_button();
 			}
-			do_action( 'woocommplugin_after_store_policies', $active_tab, $active_section );
 		?>
 	</form>	
-	<?php do_action( 'woocommplugin_after_store_policies_page', $active_tab, $active_section ); ?>
 </div>

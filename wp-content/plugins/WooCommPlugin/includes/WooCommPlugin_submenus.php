@@ -1,6 +1,7 @@
 <?php
 namespace WooCommPlugin;
 
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die; // Exit if accessed directly
 }
@@ -9,28 +10,33 @@ if ( !class_exists( 'Submenus' ) ) :
 
 class Submenus 
 {
-    public $options_page_hook;
-    
+    public $options_page_hook= 'Hello world';
+	
 	protected static $_instance = null;
+	public $TnC;
+	public $Refund;
 
-	public static function instance() 
+	public function instance() 
 	{
+		echo('instance');
 		if ( is_null( self::$_instance ) ) 
 		{
 			self::$_instance = new self();
 		}
 		return self::$_instance;
 	}
-
-    function _construct()
+	
+    public function __construct()
     {
 		// include settings classes
 		$this->TnC = include( 'WooCommPlugin_TnC_submenu.php' );
-		
-		// T&C menu item
-		add_action( 'admin_menu', array( $this, 'store_policies' ) ); // Add menu
+		$this->Rrefund = include( 'WooCommPlugin_Refund_submenu.php');
 
-		$this->general_settings	= get_option('woocommplugin_store_policies_TnC');
+		echo('Hello constructor ');
+		// T&C menu item
+		add_action( 'load_menus', array( $this, 'store_policies' ), 999 ); // Add menu\
+
+		// $this->general_settings	= get_option('woocommplugin_store_policies_TnC');
 		
     }
     
@@ -48,10 +54,11 @@ class Submenus
 		);
 	}
     
-    public function submenu_page_callback() {
-		$settings_tabs = apply_filters( 'wpo_wcpdf_settings_tabs', array (
+    public function submenu_page_callback() 
+	{
+		$settings_tabs = apply_filters( 'woocommplugin_store_policies_tabs', array (
 				'TnC'	=> __('Trems and Conditions', 'woocommplugin' ),
-				'Refund Policy'	=> __('Refund Policy', 'woocommplugin' ),
+				'Refund_Policy'	=> __('Refund Policy', 'woocommplugin' ),
 			)
 		);
 		

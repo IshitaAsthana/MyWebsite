@@ -55,30 +55,7 @@ class WooCommPlugin
 		$this->define( 'WooCommPlugin_VERSION', $this->version );
 
 		add_action( 'plugins_loaded', array( $this, 'load_classes' ) );
-		add_action( 'admin_menu', array( $this, 'load_menus' ), 999 ); 
-		// add_action( 'admin_menu' , array( $this , 'test_menu' ), 999 );
-
-		// add_action( 'init' , array( $this , 'custom_post_type' ) );
 	}
-
-	// public function test_menu() 
-    // {
-	// 	$parent_slug = 'woocommerce';
-		
-	// 	$this->options_page_hook = add_submenu_page(
-	// 		$parent_slug,
-	// 		'WooTest',
-	// 		'WooTest',
-	// 		'manage_options',
-	// 		'woocommplugin_test_submenu',
-	// 		array($this,'woocomm_test_data')
-	// 	);
-	// }
-	
-	// function woocomm_test_data()
-	// {
-	// 	echo 'HI';
-	// }
 
 	/**
 	 * Define constant if not already set
@@ -99,8 +76,6 @@ class WooCommPlugin
 		require_once plugin_dir_path( __FILE__ ) . 'includes/WooCommPlugin_activator.php';
 		WooCommPlugin_Activator::activate();
 		
-		//custom post type for fail-safe
-		// $this->custom_post_type();
 	}
 
 	/**
@@ -117,8 +92,9 @@ class WooCommPlugin
 	 */
 	public function includes() 
 	{
-		$this->$submenus = include_once( plugin_dir_path( __FILE__ ) . '/includes/WooCommPlugin_submenus.php' );
-		// include($this->plugin_path() . '/includes/WooCommPlugin_submenus.php' );
+		$this->submenus = require_once( plugin_dir_path( __FILE__ ) . '/includes/WooCommPlugin_submenus.php' );
+		
+		add_action( 'admin_menu', array( $this, 'load_menus' ), 999 ); 
 	}
 
 	
@@ -136,8 +112,7 @@ class WooCommPlugin
 			return;
 		}
 
-		if ( has_filter( 'wpo_wcpdf_pdf_maker' ) === false && version_compare( PHP_VERSION, '7.1', '<' ) ) {
-			add_filter( 'wpo_wcpdf_document_is_allowed', '__return_false', 99999 );
+		if (  version_compare( PHP_VERSION, '7.1', '<' ) ) {
 			add_action( 'admin_notices', array ( $this, 'required_php_version' ) );
 		}
 
@@ -150,7 +125,10 @@ class WooCommPlugin
 	 */
 	public function load_menus() 
     {
-		$this->$submenus->store_policies();
+		do_action( 'load_menus' );
+
+		// $this->submenus->store_policies();
+		
 	}
 	
 	/**
