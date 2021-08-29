@@ -126,8 +126,6 @@ class WooCommPlugin
 	public function load_menus() 
     {
 		do_action( 'load_menus' );
-
-		// $this->submenus->store_policies();
 		
 	}
 	

@@ -1,5 +1,5 @@
 <br>
-<h3>Terms and Conditions</h3>
+<h3>Refund Policy</h3>
 <label for="fname">First name:</label>
 <br>
 <input type="text" id="fname" name="fname" value="John">
