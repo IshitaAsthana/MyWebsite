@@ -70,6 +70,9 @@ defined( 'ABSPATH' ) or exit;
         <label for="javascript">18%</label>
         <br><br>
 
+        <input type="file" id="myFile" name="filename">
+
+        <br><br>
         <button type = "button" class = "button-primary" id="Calculate" onclick = "calculate_tax()">Calculate</button>
 				<script>
           function calculate_tax()
@@ -114,10 +117,67 @@ defined( 'ABSPATH' ) or exit;
             {
 
             }
-
+            alert(document.getElementById('myfile'));
+            handleFiles(document.getElementById('myfile'));
             window.alert('Tax distribution : \nSGST' + SGST + '\nCGST' + CGST + '\nIGST' + IGST);
           }
+          var reader = new FileReader();
+          var attendeesArray = [];
+          var fileUploaded = false;
+          function errorHandler(evt)
+          {
+            if(evt.target.error.name == "NotReadableError")
+              {
+                  alert("Cannot read file!");
+              }
+            
+          }
 
+          function getAsText(fileToRead)          
+          {
+            reader.readAsText(fileToRead);
+            
+            var fileUploaded = false;
+            reader.onerror = errorHandler;
+            
+          }
+          function handleFiles(files)
+          {
+            reader.onload = loadHandler;
+            if(window.FileReader)
+              {
+                  getAsText(files[0]);
+                  fileUploaded = true;
+
+                  alert('done upload');
+              }
+              else
+              {
+                  alert('File reader not supported in browser!');
+              }
+          }
+          function loadHandler(event)
+          {
+            let csv = event.target.result;
+              processData(csv);
+          }
+
+          function processData(csv)
+          {
+              let allTextLines = csv.split('/\r\n|\n');
+          
+              for( let i=0 ; i< allTextLines.length ; i++)
+              {
+                  let row = allTextLines[i].split(';');
+                  let col = [];
+                  for(let j=0;j<row.length;j++)
+                  {
+                      col.push(row[j]);
+                  }
+                  attendeesArray.push(col);
+              }
+          }
         </script>
+        <!-- <script src = "..\public\js\tax_file_handler.js"></script> -->
 	</form>	
 </div>

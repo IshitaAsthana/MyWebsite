@@ -93,7 +93,7 @@ class Submenus
 		$active_tab1 = isset( $_GET[ 'tab' ] ) ? sanitize_text_field( $_GET[ 'tab' ] ) : 'TnC';
 		$active_section1 = isset( $_GET[ 'section' ] ) ? sanitize_text_field( $_GET[ 'section' ] ) : '';
 
-		include('views/Tax_Sample.php');
+		include('views/check1.php');
 	}
 }
 
