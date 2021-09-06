@@ -13,18 +13,29 @@ class WooCommPlugin_TnC_submenu {
 
 	function __construct()	{
 		
-		// add_action( 'admin_init', array( $this, 'init_settings' ) );
 		add_action( 'woocommplugin_store_policies_page_TnC', array( $this, 'TnC' ), 10, 1 );
 		
 	}
 
 	public function TnC( $section ) {
-		// settings_fields( $this->option_name );
-		// do_settings_sections( $this->option_name );
+		
 		
 		include('views\TnC_page.php');
-		submit_button();
+		
 	}
+	
+
+	// public function Tnc_settings()
+	// {
+	// 	register_setting( 'tnc-settings', 'TnC_1' );
+	// 	echo('hey');
+	// 	add_settings_section( 'tnc-settings-section', 'TnC Settings', array($this,'TnC_settings_fields'), 'woocommerce' );
+	// }
+
+	// public function TnC_settings_fields()
+	// {
+	// 	echo 'Custom';
+	// }
 
 	public function init_settings() {
 		$page = $option_group = $option_name = $this->option_name;

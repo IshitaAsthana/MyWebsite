@@ -2,12 +2,17 @@
 
 defined( 'ABSPATH' ) or exit;
 
+// global $cart = $WC->cart;
+
 ?>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  
 <script type="text/javascript">
 	jQuery( function( $ ) {
 		$("#footer-thankyou").html("If you like <strong>WooCommPlugin</strong> please leave us a <a href='#'>★★★★★</a> rating. A huge thank you in advance!");
 	});
 </script>
+
 <div class="wrap">
 	<div class="icon32" id="icon-options-general"><br /></div>
 	<h2><?php _e( 'Taxes', 'woocommplugin' ); ?></h2>
@@ -43,11 +48,50 @@ defined( 'ABSPATH' ) or exit;
         <br />
         <input type="file" id="csvFile" accept=".csv" />
         <br />
-        <input type="submit" value="Submit" />
+        <!-- <input type="submit" value="Submit" /> -->
+        <button type="button" id="submit_data">Load</buttton>
+        <div id="employee_table">
+        </div>
     </form>
 </div>
 <script>
+$(document).ready(function(){
+ $('#submit_data').click(function(){
+  $.ajax({
+   url:"..\\wp-content\\plugins\\WooCommPlugin\\public\\HSN_codes.csv",
+   dataType:"text",
+   success:function(data)
+   {
+    var employee_data = data.split(/\r?\n|\r/);
+    var table_data = '<table class="table table-bordered table-striped">';
+    for(var count = 0; count<employee_data.length; count++)
+    {
+     var cell_data = employee_data[count].split(",");
+     table_data += '<tr>';
+     for(var cell_count=0; cell_count<cell_data.length; cell_count++)
+     {
+      if(count === 0)
+      {
+       table_data += '<th>'+cell_data[cell_count]+'</th>';
+      }
+      else
+      {
+       table_data += '<td>'+cell_data[cell_count]+'</td>';
+      }
+     }
+     table_data += '</tr>';
+    }
+    table_data += '</table>';
+    $('#employee_table').html(table_data);
+   }
+  });
+ });
+ 
+});
+</script>
+<!-- <script>
     const myForm = document.getElementById("tax_sample_form");
+    // document.getElementById("csvFile").defaultValue = 
     const csvFile = document.getElementById("csvFile");
     var tax_rate = 0.0;
     var SGST = 0.0;
@@ -84,7 +128,13 @@ defined( 'ABSPATH' ) or exit;
 
     myForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        const input = csvFile.files[0];
+        
+        var input = new File([""], "HSN_codes.csv", {type:"csv"});
+        if(csvFile.files.length>0)
+        {
+            input = csvFile.files[0];
+        }
+        
         const reader = new FileReader();
         
         var shipping_address;
@@ -119,17 +169,33 @@ defined( 'ABSPATH' ) or exit;
 
         reader.readAsText(input);
     });
-</script>
-<?php
-    global $WC;
-    // $items = $WC->cart->get_cart();
-    global $woocommerce; 
-    echo($WC->cart->get_total);
-    echo('no');
-    // foreach($items as $item => $values) { 
-    //     $_product =  wc_get_product( $values['data']->get_id()); 
-    //     echo "<b>".$_product->get_title().'</b>  <br> Quantity: '.$values['quantity'].'<br>'; 
-    //     $price = get_post_meta($values['product_id'] , '_price', true);
-    //     echo "  Price: ".$price."<br>";
-    // } 
+
+</script> -->
+<?php  
+    $args = array(
+        'post_type'      => 'product',
+        'posts_per_page' => 10,
+    );
+
+    $loop = new WP_Query( $args );
+
+    while ( $loop->have_posts() ) : $loop->the_post();
+        global $product;
+        echo '<br /><a href="'.get_permalink().'">' . woocommerce_get_product_thumbnail().' '.get_the_title().'</a>';
+        // echo $product['title'];
+        $hsn_code = $product->get_meta('hsn_prod_id');
+    endwhile;
+
+    echo 'hi';
+    global $woocommerce, $post;
+
+$order = new WC_Order('19');
+
+//to escape # from order id 
+
+// $order_id = trim(str_replace('#', '', $order->get_order_number()));
+echo $order;
+// echo $order_id;
+
+    wp_reset_query();
 ?>

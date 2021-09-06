@@ -11,11 +11,13 @@ if ( !class_exists( 'Submenus' ) ) :
 class Submenus 
 {
     public $options_page_hook;
-    public $options;
+	
 	
 	protected static $_instance = null;
 	public $TnC;
 	public $Refund;
+	public $Refund1;
+
 
 	public function instance() 
 	{
@@ -29,18 +31,22 @@ class Submenus
 	
     public function __construct()
     {
+		$this->_plugin = $plugin;
 		// include settings classes
 		$this->TnC = include( 'WooCommPlugin_TnC_submenu.php' );
 		$this->Refund = include( 'WooCommPlugin_Refund_Policy_submenu.php');
+		$this->Refund1 = include( 'WooCommPlugin_Refund_Policy_post_type.php');
 
 		// T&C menu item
 		add_action( 'load_menus', array( $this, 'store_policies' ), 999 ); // Add menu\
 		add_action( 'load_menus', array( $this, 'woocommplugin_tax_menu' ), 999 ); // Add menu\
-
-		// $this->general_settings	= get_option('woocommplugin_store_policies_TnC');
+		
+		add_action('woocommerce_product_options_general_product_data', array( $this , 'add_product_custom_meta_box_hsn_code') );
+		add_action( 'woocommerce_process_product_meta', array($this,'save_hsn_code_field' ));
+		
 		
     }
-    
+	
 	public function store_policies() 
     {
 		$parent_slug = 'woocommerce';
@@ -59,7 +65,7 @@ class Submenus
 	{
 		$settings_tabs = apply_filters( 'woocommplugin_store_policies_tabs', array (
 				'TnC'	=> __('Terms and Conditions', 'woocommplugin' ),
-				'Refund_Policy'	=> __('Refund Policy', 'woocommplugin' ),
+				// 'Refund_Policy'	=> __('Refund Policy', 'woocommplugin' ),
 			)
 		);
 		
@@ -94,7 +100,25 @@ class Submenus
 		$active_section1 = isset( $_GET[ 'section' ] ) ? sanitize_text_field( $_GET[ 'section' ] ) : '';
 
 		include('views/check1.php');
+		
 	}
+	
+    public function add_product_custom_meta_box_hsn_code() {
+        woocommerce_wp_text_input( 
+            array( 
+                'id'            => 'hsn_prod_id', 
+                'label'         => __('HSN Code', 'woocommerce' ), 
+                'description'   => __( 'HSN Code is mandatory for GST.', 'woocommerce' ),
+                'custom_attributes' => array( 'required' => 'required' ),
+                'value'         => get_post_meta( get_the_ID(), 'hsn_prod_id', true )
+                )
+            );
+    }
+
+	public function save_hsn_code_field( $post_id ) {
+        $value = ( $_POST['hsn_prod_id'] )? sanitize_text_field( $_POST['hsn_prod_id'] ) : '' ;
+        update_post_meta( $post_id, 'hsn_prod_id', $value );
+    }
 }
 
 
