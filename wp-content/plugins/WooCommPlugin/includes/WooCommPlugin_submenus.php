@@ -31,40 +31,49 @@ class Submenus
 	
     public function __construct()
     {
-		$this->_plugin = $plugin;
+		
 		// include settings classes
 		$this->TnC = include( 'WooCommPlugin_TnC_submenu.php' );
 		$this->Refund = include( 'WooCommPlugin_Refund_Policy_submenu.php');
-		$this->Refund1 = include( 'WooCommPlugin_Refund_Policy_post_type.php');
+		$this->Refund1 = include( 'WooCommPlugin_Terms_and_Conditions_post_type.php');
 
 		// T&C menu item
-		add_action( 'load_menus', array( $this, 'store_policies' ), 999 ); // Add menu\
+		add_action( 'load_menus', array( $this, 'invoice_settings' ), 999 ); // Add menu\
+		//Tax menu
 		add_action( 'load_menus', array( $this, 'woocommplugin_tax_menu' ), 999 ); // Add menu\
 		
+		//Product hsn code
 		add_action('woocommerce_product_options_general_product_data', array( $this , 'add_product_custom_meta_box_hsn_code') );
 		add_action( 'woocommerce_process_product_meta', array($this,'save_hsn_code_field' ));
 		
-		
+		add_filter( 'woocommerce_tax_settings', array($this, 'tax_setting_for_gst') );
+		// add_filter( 'woocommerce_cart_taxes_total', array($this, 'order_taxes'), 10, 4 );
+		add_filter( 'woocommerce_calculated_total', array($this,'change_calculated_total'), 10, 2 );
     }
 	
-	public function store_policies() 
+	
+	public function change_calculated_total( $total, $cart ) {
+	    return $total + 300;
+	}
+
+	public function invoice_settings() 
     {
 		$parent_slug = 'woocommerce';
 
 		$this->options_page_hook = add_submenu_page(
 			$parent_slug,
-			'Store Policies',
-			'Store Policies',
+			'Invoice Settings',
+			'Invoice Settings',
 			'manage_woocommerce',
-			'woocommplugin_store_policies_submenu',
-            array($this,'store_policies_callback')
+			'woocommplugin_invoice_settings_submenu',
+            array($this,'invoice_settings_callback')
 		);
 	}
     
-    public function store_policies_callback() 
+    public function invoice_settings_callback() 
 	{
-		$settings_tabs = apply_filters( 'woocommplugin_store_policies_tabs', array (
-				'TnC'	=> __('Terms and Conditions', 'woocommplugin' ),
+		$settings_tabs = apply_filters( 'woocommplugin_invoice_settings_tabs', array (
+				'Invoice'	=> __('Invoice', 'woocommplugin' ),
 				// 'Refund_Policy'	=> __('Refund Policy', 'woocommplugin' ),
 			)
 		);
@@ -119,6 +128,19 @@ class Submenus
         $value = ( $_POST['hsn_prod_id'] )? sanitize_text_field( $_POST['hsn_prod_id'] ) : '' ;
         update_post_meta( $post_id, 'hsn_prod_id', $value );
     }
+
+	public function tax_setting_for_gst($settings)
+	{
+		array_push($settings, array(
+			'title'   => __( 'Use default GST', 'woocommerce' ),
+			'desc'    => __( 'Use in-built GST data for tax calculation', 'woocommerce' ),
+			'id'      => 'woocommplugin_use_default_gst',
+			'default' => 'yes',
+			'type'    => 'checkbox',
+		));
+		
+		return $settings;
+	}
 }
 
 

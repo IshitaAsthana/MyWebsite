@@ -2,8 +2,6 @@
 
 defined( 'ABSPATH' ) or exit;
 
-// global $cart = $WC->cart;
-
 ?>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
   
@@ -26,16 +24,16 @@ defined( 'ABSPATH' ) or exit;
 	</h2>
     <form id="tax_sample_form">
         <?php
-			do_action( 'woocommplugin_tax_sample_page', $active_tab, $active_section );
-			if ( has_action( 'woocommplugin_tax_sample_page_'.$active_tab )) {
+			// do_action( 'woocommplugin_tax_sample_page', $active_tab, $active_section );
+			// if ( has_action( 'woocommplugin_tax_sample_page_'.$active_tab )) {
 				
-				do_action( 'woocommplugin_tax_sample_page_'.$active_tab, $active_section );
+			// 	do_action( 'woocommplugin_tax_sample_page_'.$active_tab, $active_section );
 				
-			} else {
+			// } else {
 				
-				do_action( 'woocommplugin_tax_sample_page_'.$active_tab, $active_section );
+			// 	do_action( 'woocommplugin_tax_sample_page_'.$active_tab, $active_section );
 				
-			}
+			// }
 		?>
         <label for="shipping_address">Choose Shipping state:</label><br>
 
@@ -171,6 +169,15 @@ $(document).ready(function(){
     });
 
 </script> -->
+<?php
+
+echo get_option( 'woocommerce_store_address', '' );
+echo get_option( 'woocommerce_store_address_2', '' );
+$state = wc_get_base_location();
+echo $state['state'];
+echo $state['country'];
+
+?>
 <?php  
     $args = array(
         'post_type'      => 'product',
@@ -181,7 +188,7 @@ $(document).ready(function(){
 
     while ( $loop->have_posts() ) : $loop->the_post();
         global $product;
-        echo '<br /><a href="'.get_permalink().'">' . woocommerce_get_product_thumbnail().' '.get_the_title().'</a>';
+        // echo '<br /><a href="'.get_permalink().'">' . woocommerce_get_product_thumbnail().' '.get_the_title().'</a>';
         // echo $product['title'];
         $hsn_code = $product->get_meta('hsn_prod_id');
     endwhile;
@@ -194,8 +201,56 @@ $order = new WC_Order('19');
 //to escape # from order id 
 
 // $order_id = trim(str_replace('#', '', $order->get_order_number()));
-echo $order;
+// echo $order;
 // echo $order_id;
 
     wp_reset_query();
 ?>
+<?php
+// add_filter( 'woocommerce_cart_taxes_total', function($total, $compound, $display, $mycart){
+    
+// 		echo '<br>'.$total.' '.$compound.' '.$display.' '.$mycart.'<br>';
+
+// 		return;
+// }, 10, 4 );
+
+// if(has_action( 'woocommerce_cart_taxes_total'))
+//     echo "yesssss";
+// add_filter( 'woocommerce_calculated_totals', 'change_calculated_total', 10, 2 );
+// function change_calculated_total( $total, $cart ) {
+//     echo $total;
+//     return $total + 300;
+// }
+
+// add_action( 'woocommerce_cart_calculate_fees', 'add_custom_fee', 10, 1 );
+// function add_custom_fee ( $cart ) {
+//     if ( is_admin() && ! defined( 'DOING_AJAX' ) )
+//         return;
+
+//     $fee = 300;
+
+//     $cart->add_fee( __( 'Fee', 'woocommerce' ) , $fee, false );
+// }
+// add_action( 'woocommerce_calculate_totals', 'action_cart_calculate_totals', 10, 1 );
+// function action_cart_calculate_totals( $cart_object ) {
+
+//     if ( is_admin() && ! defined( 'DOING_AJAX' ) )
+//     {
+//         return;
+//     }
+
+//     if ( !WC()->cart->is_empty() ):
+//         ## Displayed subtotal (+10%)
+//         // $cart_object->subtotal *= 1.1;
+
+//         ## Displayed TOTAL (+10%)
+//         // $cart_object->total *= 1.1;
+
+//         ## Displayed TOTAL CART CONTENT (+10%)
+//         $cart_object->cart_contents_total *= 1.1;
+
+//     endif;
+
+//     if(WC()->cart->is_empty())
+//         echo $cart_object
+// }
