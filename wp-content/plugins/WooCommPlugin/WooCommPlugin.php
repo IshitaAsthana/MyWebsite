@@ -61,6 +61,7 @@ class WooCommPlugin
 		add_action( 'plugins_loaded', array( $this, 'load_classes' ) );
 	}
 
+
 	/**
 	 * Define constant if not already set
 	 * @param  string $name

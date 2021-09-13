@@ -28,19 +28,34 @@ class WooCommPlugin_Activator
         flush_rewrite_rules();
         global $wpdb;
  
-        $table_name = $wpdb->prefix . "payment";
+        $table_name = $wpdb->prefix . "gst_data";
         
         $charset_collate = $wpdb->get_charset_collate();
         
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
-          id bigint(20) NOT NULL AUTO_INCREMENT,
-          user_id bigint(20) UNSIGNED NOT NULL,
-          created_at datetime NOT NULL,
-          expires_at datetime NOT NULL,
-          PRIMARY KEY id (id)
-        ) $charset_collate;";
+          HSNCode INT NOT NULL,
+          CGSTRate DECIMAL(5,2) NOT NULL,
+          SGSTRate DECIMAL(5,2) NOT NULL,
+          IGSTRate DECIMAL(5,2) NOT NULL,
+          PRIMARY KEY (HSNCode)
+        ) 
+        $charset_collate;";
     
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);          
-	}  
+
+
+		    if($wpdb->get_var("SHOW TABLES LIKE 'wp_gst_data'") == 'wp_gst_data'):
+        
+		    $wpdb->query("LOAD DATA INFILE './../../htdocs/MyWebsite/wp-content/plugins/WooCommPlugin/public/HSN_codes.csv' 
+		    INTO TABLE wp_gst_data 
+		    FIELDS TERMINATED BY ','
+		    ENCLOSED BY ''
+		    LINES TERMINATED BY '\n'
+		    IGNORE 1 ROWS;");
+
+        endif;
+    }
 }
+
+?>
