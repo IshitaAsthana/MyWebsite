@@ -47,11 +47,13 @@ class Tax_Modifier
 
         
         //ajax scripts for gst state
+
         add_action( 'wp_enqueue_scripts', array($this,'blog_scripts') ); 
         
         add_action('wp_ajax_get_states_by_ajax', array($this,'order_total'));
         add_action('wp_ajax_nopriv_get_states_by_ajax',array($this, 'order_total'));
     }
+
 
     //ajax for gst state
     public function blog_scripts() {
@@ -68,9 +70,11 @@ class Tax_Modifier
         // Enqueued script with localized data.
         wp_enqueue_script( 'custom-script' );
 
+
     }
 
     //to remove taxes at cart before checkout
+
     public function action_cart_calculate_totals( $cart_object ) {
 
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) )
@@ -84,7 +88,9 @@ class Tax_Modifier
 		endif;
 	}	
 
+
     //set total same as subtotal at cart before checkout
+
 	public function change_calculated_total( $total, $cart ) {
         $sub = $cart->get_subtotal();
 		$total = $sub;
@@ -105,12 +111,13 @@ class Tax_Modifier
 		return $settings;
 	}
 
+
     
     //store details
     public function store_details()
     {
         $this->store_location =  wc_get_base_location();
-        
+
     }
 
     //modify checkout total
@@ -132,8 +139,6 @@ class Tax_Modifier
             $new_total += (int)$val[$j];
         }
 
-        
-
 
         //url check to avoid cart total change
         $url = $_SERVER['REQUEST_URI'];
@@ -144,6 +149,7 @@ class Tax_Modifier
         {
             $tax = 0;
         }
+        
         else
         {
 
@@ -170,6 +176,7 @@ class Tax_Modifier
         return $value;
     }
     
+
 }
 
 endif;

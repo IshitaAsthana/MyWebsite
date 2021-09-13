@@ -29,7 +29,9 @@ class WooCommPlugin
 	public $plugin_basename;
 	public $submenus;
 	public $tax_modifier;
+
 	public $gst_table;
+
 
 	protected static $_instance = null;
 
@@ -96,6 +98,8 @@ class WooCommPlugin
 	{
 		$this->submenus = require_once( plugin_dir_path( __FILE__ ) . '/includes/WooCommPlugin_submenus.php' );
 		$this->tax_modifier = require_once( plugin_dir_path( __FILE__ ) . '/includes/WooCommPlugin_Tax_Modifier.php' );
+
+
 
 		add_action( 'admin_menu', array( $this, 'load_menus' ), 999 ); 
 	}
