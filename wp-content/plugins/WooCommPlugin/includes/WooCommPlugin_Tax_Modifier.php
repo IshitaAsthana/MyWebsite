@@ -48,7 +48,7 @@ class Tax_Modifier
         //calculate tax
         // $this->tax_calculate();
         //modify checkout total
-        add_filter( 'woocommerce_cart_totals_order_total_html', array($this,'order_total'),999);
+        add_filter( 'woocommerce_cart_totals_order_total_html', array($this,'order_total'));
 
         add_filter( 'woocommerce_order_button_text', array($this,'confirm_order') );
         
@@ -56,8 +56,8 @@ class Tax_Modifier
         
         add_action( 'wp_enqueue_scripts', array($this,'blog_scripts') ); 
         
-        add_action('wp_ajax_get_states_by_ajax', array($this,'get_states_by_ajax_callback'));
-        add_action('wp_ajax_nopriv_get_states_by_ajax',array($this, 'get_states_by_ajax_callback'));
+        add_action('wp_ajax_get_states_by_ajax', array($this,'order_total'));
+        add_action('wp_ajax_nopriv_get_states_by_ajax',array($this, 'order_total'));
     }
 
     public function billing_state_ajax()
@@ -77,27 +77,23 @@ class Tax_Modifier
       
         // Enqueued script with localized data.
         wp_enqueue_script( 'custom-script' );
+
+        // $this->tax_slab = $_POST['val'];
     }
 
     public function get_states_by_ajax_callback() {
-        check_ajax_referer('load_states', 'security');
-        $country = $_POST['country'];
-        global $wpdb;
-        $aStates = $wpdb->get_results( $wpdb->prepare( "SELECT id, state_name FROM ".$wpdb->prefix."states WHERE cid = %d", $country ) );
-        if ( $aStates ) {
-            ?>
-            <select>
-                <?php
-                foreach ($aStates as $state) {
-                    ?>
-                    <option value="<?php echo $state->id; ?>"><?php echo $state->state_name; ?></option>
-                    <?php
-                }
-                ?>
-            </select>
-            <?php
-        }
-        wp_die();
+        // check_ajax_referer('load_states', 'security');
+        $this->tax_slab = $_POST['state'];
+        // global $wpdb;
+        // $aStates = $wpdb->get_results( $wpdb->prepare( "SELECT id, state_name FROM ".$wpdb->prefix."states WHERE cid = %d", $country ) );
+        // if ( $aStates ) {
+            
+        // remove_filter( 'woocommerce_cart_totals_order_total_html', array($this,'order_total'));
+        // add_filter( 'woocommerce_cart_totals_order_total_html', array($this,'order_total'));
+        // $this->order_total()
+         
+         
+        // wp_die();
     }
 
     //to remove taxes before checkout
@@ -215,7 +211,11 @@ class Tax_Modifier
 
         $new_total = $tax + $new_total;// + $this->billing_location['state'];  //add tax here
         
-        $value = str_replace($val,$new_total,$value);
+        //grab the selected state
+        $this->tax_slab = $_POST['state'];
+
+
+        $value = str_replace($val,$this->tax_slab,$value);
         return $value;
     }
 
