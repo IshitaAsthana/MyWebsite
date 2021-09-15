@@ -35,26 +35,118 @@ class Tax_Modifier
         
         //address of store
         $this->store_details();
+        $this->set_billing_location();
         // remove taxes before checkout
-        add_action( 'woocommerce_calculate_totals', array($this, 'action_cart_calculate_totals'), 10, 1 );
+        // add_action( 'woocommerce_calculate_totals', array($this, 'action_cart_calculate_totals'), 10, 1 );
         //set total same as subtotal before checkout
-		add_filter( 'woocommerce_calculated_total', array($this,'change_calculated_total'), 10, 2 );
+		// add_filter( 'woocommerce_calculated_total', array($this,'change_calculated_total'), 10, 2 );
         //add checkbox to use GST settings
 		add_filter( 'woocommerce_tax_settings', array($this, 'tax_setting_for_gst') );
 
         //modify checkout total
-        add_filter( 'woocommerce_cart_totals_order_total_html', array($this,'order_total'));
+        // add_filter( 'woocommerce_cart_totals_order_total_html', array($this,'order_total'));
 
         
         //ajax scripts for gst state
 
         add_action( 'wp_enqueue_scripts', array($this,'blog_scripts') ); 
         
-        add_action('wp_ajax_get_states_by_ajax', array($this,'order_total'));
-        add_action('wp_ajax_nopriv_get_states_by_ajax',array($this, 'order_total'));
+        add_action('wp_ajax_get_states_by_ajax', array($this,'set_billing_location'));
+        add_action('wp_ajax_nopriv_get_states_by_ajax',array($this, 'set_billing_location'));
         add_filter( 'woocommerce_cart_item_product', array($this, 'cart_contents'),10,3 );
+
+        // add_filter( 'woocommerce_calculate_item_totals_taxes', array($this,'modify_tax_totals'),10,3 );
+        // add_filter( 'woocommerce_calc_tax', array($this,'modify_taxes'),10,5 );
+
+        add_filter( 'woocommerce_cart_totals_get_item_tax_rates', array($this,'change_tax_rates'),10,3 );
+        add_filter( 'woocommerce_cart_tax_totals', array($this,'update_taxes'),10,2);
         // add_filter( 'woocommerce_get_cart_contents', array($this, 'get_cart_contents'));
         // add_filter( 'woocommerce_cart_item_class', array($this, 'once_get_cart_contents'),10,3);
+        add_filter( 'woocommerce_countries_inc_tax_or_vat', function () 
+        {
+           return __( 'GST', 'woocommerce' );
+        });
+    }
+
+    public function set_billing_location()
+    {
+        //grab the selected state
+        $this->billing_location = $_POST['state'];
+    }
+
+    public function change_tax_rates($item_tax_rates, $item, $cart)
+    {
+        //url check to avoid cart total change
+        $url = $_SERVER['REQUEST_URI'];
+        
+        $uri_list = array( explode('/',$url));
+        
+        global $wpdb;
+        $hsn = $item->product->get_meta('hsn_prod_id');
+        $rate = $wpdb->get_results("SELECT IGSTRate FROM wp_gst_data WHERE HSNCode = $hsn");
+        // print_r($item_tax_rates);
+        foreach($rate as $rates)
+        {
+            if($uri_list[0][count($uri_list[0])-2]=="cart")
+            {
+                $item_tax_rates[5]['rate'] = 0;
+                $item_tax_rates[6]['rate'] = 0;   
+            }
+            else
+            {
+                // while(count($item_tax_rates)>0)
+                // {
+                //     // array_pop($item_tax_rates);
+                // }
+                // $arr=array('rate'=>$rates->IGSTRate,'label'=>"IGST",'shipping'=>"no",'custom'=>"no");
+                // array_push($arr);
+                // for($i = 0;$i<count($item_tax_rates);$i++)
+                // {
+                //     if($this->billing_location == $this->store_location['state'])
+                //     {
+                //         $item_tax_rates[$i]['rate'] = $rates->IGSTRate/2;
+                //     }
+                //     else
+                //     {
+                //         $item_tax_rates[$i]['rate'] = $rates->IGSTRate;
+                //     }
+
+                // }
+                $keys = array_keys($item_tax_rates);
+                foreach($keys as $key)
+                {
+                    if($this->billing_location == $this->store_location['state'])
+                    {
+                        $item_tax_rates[$key]['rate'] = $rates->IGSTRate/2;
+                    }
+                    else
+                    {
+                        $item_tax_rates[$key]['rate'] = $rates->IGSTRate;
+                        // $item_tax_rates[$key]['label'] = "IGST";
+                    }
+                }
+                
+                // if($this->billing_location == $this->store_location['state'])
+                // {
+                //     $item_tax_rates[5]['rate'] = $rates->IGSTRate/2;
+                //     $item_tax_rates[6]['rate'] = $rates->IGSTRate/2;
+
+                //     $item_tax_rates[5]['label'] = 'SGST';
+                //     $item_tax_rates[6]['label'] = "CGST";
+                // }
+                // else
+                // {
+                //     $item_tax_rates[39]['rate'] = $rates->IGSTRate;
+                //     // $item_tax_rates[6]['rate'] = 0;
+
+                //     $item_tax_rates[39]['label'] = "IGST";
+                //     // $item_tax_rates[6]['label'] = "_";
+                // }
+            }  
+        }
+        
+        // print_r($item_tax_rates);
+        return $item_tax_rates;
     }
 
 
@@ -85,7 +177,7 @@ class Tax_Modifier
 		}
 	
 		if ( !WC()->cart->is_empty() ):
-			$cart_object->set_cart_contents_taxes(array(0,0));
+			// $cart_object->set_cart_contents_taxes(array(0,0));
 	
 		endif;
 	}	
@@ -95,6 +187,7 @@ class Tax_Modifier
 	public function change_calculated_total( $total, $cart ) {
         $sub = $cart->get_subtotal();
 		$total = $sub;
+        // print_r($cart);
 	    return $total;
 	}
 
@@ -141,6 +234,58 @@ class Tax_Modifier
         return $product;
     }
 
+    public function update_taxes($tax_totals,$cart)
+    {
+        $tax_list = array();
+        foreach($this->cart_items_list as $cart_item)
+        {
+            array_push($tax_list,$cart_item["product_tax"]);
+        }
+        // $cart->set_cart_contents_taxes($tax_list);
+        // print_r($tax_list);
+        // print_r($cart);
+        // print_r($cart->get_cart_tax());
+        return $tax_totals;
+    }
+
+    public function modify_taxes( $taxes, $price, $rates, $price_includes_tax, $deprecated)
+    {
+        $new_taxes = array();
+        // $rates;
+        // $rates = $this->cart_items_list['tax_rate'];
+        foreach($this->cart_items_list as $cart_item)
+        {
+            // $rates = $cart_item['tax_rate'];
+            array_push($new_taxes,$cart_item['product_tax']);
+        }
+        // if ( $price_includes_tax ) {
+		// 	$taxes = WC_Tax::calc_inclusive_tax( $price, $rates );
+		// } else {
+		// 	$taxes = WC_Tax::calc_exclusive_tax( $price, $rates );
+		// }
+        array_replace($taxes,$new_taxes);
+        // $taxes = array($rates,$price);
+        // print_r($taxes);
+        return $taxes;
+    }
+
+    public function modify_tax_totals($taxes,$item,$cart_totals)
+    {
+        
+        $tax_list = array();
+        $i = 0;
+        foreach($this->cart_items_list as $cart_item)
+        {
+            array_push($tax_list,$cart_item["product_tax"]);
+        }
+        foreach($taxes as $tax_item)
+        {
+            // $tax_item = $tax_list[$i];
+            // $i++;
+            print_r($tax_list);
+        }
+        return $taxes;
+    }
 
     //modify checkout total
     public function order_total($value)
