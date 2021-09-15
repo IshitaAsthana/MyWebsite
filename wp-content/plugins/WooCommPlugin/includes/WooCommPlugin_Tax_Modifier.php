@@ -62,6 +62,10 @@ class Tax_Modifier
         add_filter( 'woocommerce_cart_tax_totals', array($this,'update_taxes'),10,2);
         // add_filter( 'woocommerce_get_cart_contents', array($this, 'get_cart_contents'));
         // add_filter( 'woocommerce_cart_item_class', array($this, 'once_get_cart_contents'),10,3);
+        add_action( 'woocommerce_review_order_after_submit',function()
+        {
+            print_r(WC()->cart);
+        } );
         add_filter( 'woocommerce_countries_inc_tax_or_vat', function () 
         {
            return __( 'GST', 'woocommerce' );
@@ -89,59 +93,30 @@ class Tax_Modifier
         {
             if($uri_list[0][count($uri_list[0])-2]=="cart")
             {
-                $item_tax_rates[5]['rate'] = 0;
-                $item_tax_rates[6]['rate'] = 0;   
+                $keys = array_keys($item_tax_rates);
+                foreach($keys as $key)
+                {
+                    $item_tax_rates[$key]['rate'] = 0;
+                }  
             }
             else
             {
-                // while(count($item_tax_rates)>0)
-                // {
-                //     // array_pop($item_tax_rates);
-                // }
-                // $arr=array('rate'=>$rates->IGSTRate,'label'=>"IGST",'shipping'=>"no",'custom'=>"no");
-                // array_push($arr);
-                // for($i = 0;$i<count($item_tax_rates);$i++)
-                // {
-                //     if($this->billing_location == $this->store_location['state'])
-                //     {
-                //         $item_tax_rates[$i]['rate'] = $rates->IGSTRate/2;
-                //     }
-                //     else
-                //     {
-                //         $item_tax_rates[$i]['rate'] = $rates->IGSTRate;
-                //     }
-
-                // }
+                
                 $keys = array_keys($item_tax_rates);
                 foreach($keys as $key)
                 {
                     if($this->billing_location == $this->store_location['state'])
                     {
                         $item_tax_rates[$key]['rate'] = $rates->IGSTRate/2;
+                        $item_tax_rates[$key]['label'] = "SGST/CGST";
                     }
                     else
                     {
                         $item_tax_rates[$key]['rate'] = $rates->IGSTRate;
-                        // $item_tax_rates[$key]['label'] = "IGST";
+                        $item_tax_rates[$key]['label'] = "IGST";
                     }
                 }
                 
-                // if($this->billing_location == $this->store_location['state'])
-                // {
-                //     $item_tax_rates[5]['rate'] = $rates->IGSTRate/2;
-                //     $item_tax_rates[6]['rate'] = $rates->IGSTRate/2;
-
-                //     $item_tax_rates[5]['label'] = 'SGST';
-                //     $item_tax_rates[6]['label'] = "CGST";
-                // }
-                // else
-                // {
-                //     $item_tax_rates[39]['rate'] = $rates->IGSTRate;
-                //     // $item_tax_rates[6]['rate'] = 0;
-
-                //     $item_tax_rates[39]['label'] = "IGST";
-                //     // $item_tax_rates[6]['label'] = "_";
-                // }
             }  
         }
         
@@ -241,9 +216,22 @@ class Tax_Modifier
         {
             array_push($tax_list,$cart_item["product_tax"]);
         }
+        $keys = array_keys($tax_totals);
+        foreach($keys as $key)
+        {
+            if($this->billing_location == $this->store_location['state'])
+            {
+                $tax_totals[$key]->label = "SGST/CGST";
+            }
+            else
+            {
+                $tax_totals[$key]->label = "IGST";
+            }
+        }
         // $cart->set_cart_contents_taxes($tax_list);
         // print_r($tax_list);
         // print_r($cart);
+        // echo "<br><br>";
         // print_r($cart->get_cart_tax());
         return $tax_totals;
     }
