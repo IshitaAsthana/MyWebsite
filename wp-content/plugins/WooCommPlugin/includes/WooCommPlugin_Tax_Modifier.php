@@ -31,8 +31,8 @@ class Tax_Modifier
     public function __construct()
     {
         $this->calculated_tax = array("SGST"=>0.0,"CGST"=>0.0,"IGST"=>0.0);
-        // $this->billing_location = $fields['billing']['billing_phone'];
-
+        $this->cart_items_list = array();
+        
         //address of store
         $this->store_details();
         // remove taxes before checkout
@@ -52,6 +52,9 @@ class Tax_Modifier
         
         add_action('wp_ajax_get_states_by_ajax', array($this,'order_total'));
         add_action('wp_ajax_nopriv_get_states_by_ajax',array($this, 'order_total'));
+        add_filter( 'woocommerce_cart_item_product', array($this, 'cart_contents'),10,3 );
+        // add_filter( 'woocommerce_get_cart_contents', array($this, 'get_cart_contents'));
+        // add_filter( 'woocommerce_cart_item_class', array($this, 'once_get_cart_contents'),10,3);
     }
 
 
@@ -74,7 +77,6 @@ class Tax_Modifier
     }
 
     //to remove taxes at cart before checkout
-
     public function action_cart_calculate_totals( $cart_object ) {
 
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) )
@@ -90,7 +92,6 @@ class Tax_Modifier
 
 
     //set total same as subtotal at cart before checkout
-
 	public function change_calculated_total( $total, $cart ) {
         $sub = $cart->get_subtotal();
 		$total = $sub;
@@ -111,8 +112,6 @@ class Tax_Modifier
 		return $settings;
 	}
 
-
-    
     //store details
     public function store_details()
     {
@@ -120,9 +119,31 @@ class Tax_Modifier
 
     }
 
+
+    //cart contents
+    public function cart_contents($product, $cart_item, $cart_item_key)
+    {
+        $hsn = $product->get_meta('hsn_prod_id');
+        $qty = $cart_item['quantity'];
+        $subtotal = $qty*$product->get_price();
+
+        if(!array_search($hsn,$this->cart_items_list,true))
+        {
+            array_push($this->cart_items_list,array("hsn"=>$hsn,"quantity"=>$qty,"subtotal"=>$subtotal));
+        }
+        // print_r($this->cart_items_list);
+        // array_push($this->cart_items_list,array())
+        return $product;
+    }
+
+
     //modify checkout total
     public function order_total($value)
-    {   $tax = 0;
+    {   
+        //tax to be added
+        $tax = 0;
+
+        //find current cart value in float from formatted data
         $start = 117;
         $end = strlen($value) - 23;
         $val = '';
@@ -168,9 +189,8 @@ class Tax_Modifier
             $tax = $this->calculated_tax["IGST"];
         }
 
+        //add the total tax
         $new_total = $tax + $new_total;
-        
-        
 
         $value = str_replace($val,$new_total,$value);
         return $value;
