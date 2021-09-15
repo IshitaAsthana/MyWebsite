@@ -127,12 +127,17 @@ class Tax_Modifier
         $qty = $cart_item['quantity'];
         $subtotal = $qty*$product->get_price();
 
-        if(!array_search($hsn,$this->cart_items_list,true))
+        global $wpdb;
+        $rate = $wpdb->get_results("SELECT IGSTRate FROM wp_gst_data WHERE HSNCode = $hsn");
+
+        foreach($rate as $rates)
         {
-            array_push($this->cart_items_list,array("hsn"=>$hsn,"quantity"=>$qty,"subtotal"=>$subtotal));
+            if(!array_search($hsn,$this->cart_items_list,true))
+            {
+                array_push($this->cart_items_list,array("hsn"=>$hsn,"quantity"=>$qty,"subtotal"=>$subtotal, "tax_rate" => $rates->IGSTRate, "product_tax" => $rates->IGSTRate*$subtotal*0.01));
+            }
         }
         // print_r($this->cart_items_list);
-        // array_push($this->cart_items_list,array())
         return $product;
     }
 
@@ -173,13 +178,18 @@ class Tax_Modifier
         
         else
         {
+            $total_tax = 0.0;
+            foreach($this->cart_items_list as $cart_item)
+            {
+                $total_tax += $cart_item["product_tax"];
+            }
 
             //grab the selected state
             $this->billing_location = $_POST['state'];
             
             if($this->billing_location == $this->store_location['state'])
             {
-                $this->calculated_tax["IGST"] = 1000;   
+                $this->calculated_tax["IGST"] = $total_tax;   
             }
             else
             {
