@@ -35,7 +35,6 @@ class Tax_Modifier
         
         //address of store
         $this->store_details();
-        $this->set_billing_location();
         // remove taxes before checkout
         // add_action( 'woocommerce_calculate_totals', array($this, 'action_cart_calculate_totals'), 10, 1 );
         //set total same as subtotal before checkout
@@ -62,14 +61,29 @@ class Tax_Modifier
         add_filter( 'woocommerce_cart_tax_totals', array($this,'update_taxes'),10,2);
         // add_filter( 'woocommerce_get_cart_contents', array($this, 'get_cart_contents'));
         // add_filter( 'woocommerce_cart_item_class', array($this, 'once_get_cart_contents'),10,3);
-        add_action( 'woocommerce_review_order_after_submit',function()
-        {
-            print_r(WC()->cart);
-        } );
+        // add_action( 'woocommerce_review_order_after_submit',function()
+        // {
+        //     print_r(WC()->cart);
+        // } );
+        add_action( 'woocommerce_checkout_create_order', array($this,'change_total_on_checking'), 20, 2 );
+
         add_filter( 'woocommerce_countries_inc_tax_or_vat', function () 
         {
            return __( 'GST', 'woocommerce' );
         });
+    }
+    public function change_total_on_checking( $order,$data ) 
+    {
+        // print_r($data);
+        // // Get order total
+        // $total = $order->get_total();
+    
+        // ## -- Make your checking and calculations -- ##
+        // $new_total = $total * 1.12; // <== Fake calculation
+    
+        // // Set the new calculated total
+        // $order->set_total( $new_total );
+        return $order;
     }
 
     public function set_billing_location()
@@ -80,6 +94,8 @@ class Tax_Modifier
 
     public function change_tax_rates($item_tax_rates, $item, $cart)
     {
+
+        
         //url check to avoid cart total change
         $url = $_SERVER['REQUEST_URI'];
         
@@ -119,7 +135,8 @@ class Tax_Modifier
                 
             }  
         }
-        
+        // print_r(WC()->cart);
+        // echo "<br><br>";
         // print_r($item_tax_rates);
         return $item_tax_rates;
     }
@@ -184,7 +201,7 @@ class Tax_Modifier
     public function store_details()
     {
         $this->store_location =  wc_get_base_location();
-
+        $this->billing_location = $this->store_location['state'];
     }
 
 
@@ -231,6 +248,7 @@ class Tax_Modifier
         // $cart->set_cart_contents_taxes($tax_list);
         // print_r($tax_list);
         // print_r($cart);
+        print_r(WC()->cart->get_cart_contents_tax());
         // echo "<br><br>";
         // print_r($cart->get_cart_tax());
         return $tax_totals;
