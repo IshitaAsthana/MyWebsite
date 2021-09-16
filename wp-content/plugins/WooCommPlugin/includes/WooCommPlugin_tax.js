@@ -21,4 +21,5 @@ jQuery(function($) {
         
         jQuery('body').trigger('update_checkout');  
     });
+    // jQuery('body').trigger('update_checkout'); 
 });
