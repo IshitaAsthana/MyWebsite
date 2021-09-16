@@ -55,6 +55,7 @@ class WooCommPlugin_Activator
 		    IGNORE 1 ROWS;");
 
         endif;
+
     }
 }
 

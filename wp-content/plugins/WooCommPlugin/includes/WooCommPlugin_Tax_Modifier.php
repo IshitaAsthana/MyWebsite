@@ -13,6 +13,7 @@ class Tax_Modifier
     public $store_location;
     public $shipping_location;
     public $billing_location;
+    public $billing_location_set;
     public $cart_items_list;
     public $calculated_tax;
     public $tax_slab;
@@ -30,6 +31,7 @@ class Tax_Modifier
 
     public function __construct()
     {
+        $this->billing_location_set = 0;
         $this->calculated_tax = array("SGST"=>0.0,"CGST"=>0.0,"IGST"=>0.0);
         $this->cart_items_list = array();
         
@@ -64,8 +66,12 @@ class Tax_Modifier
         add_action( 'woocommerce_review_order_after_submit',function()
         {
             // print_r(WC()->cart);
-            print_r(WC()->cart->get_tax_totals());
+            // print_r(WC()->cart->get_tax_totals());
         } );
+        // add_action( 'woocommerce_review_order_before_cart_contents', function(){
+        //     //  print_r(WC()->cart->get_tax_totals());
+        //     // echo $this->billing_location;
+        // } );
         add_action( 'woocommerce_checkout_create_order', array($this,'change_total_on_checking'), 20, 2 );
 
         add_filter( 'woocommerce_countries_inc_tax_or_vat', function () 
@@ -89,13 +95,21 @@ class Tax_Modifier
 
     public function set_billing_location()
     {
+        $this->billing_location_set = 1;
         //grab the selected state
-        $this->billing_location = $_POST['state'];
+        if(isset($_POST["state"]))
+        {
+            $this->billing_location = $_POST['state'];
+        }
+        else
+        {
+            $this->billing_location = $this->store_location['state'];
+        }
+
     }
 
     public function change_tax_rates($item_tax_rates, $item, $cart)
     {
-        $this->set_billing_location();
         //url check to avoid cart total change
         $url = $_SERVER['REQUEST_URI'];
         
@@ -118,9 +132,11 @@ class Tax_Modifier
             else
             {
                 
+                $this->set_billing_location();
                 $keys = array_keys($item_tax_rates);
                 foreach($keys as $key)
                 {
+                    // $this->set_billing_location();
                     if($this->billing_location == $this->store_location['state'])
                     {
                         $item_tax_rates[$key]['rate'] = $rates->IGSTRate/2;
@@ -135,9 +151,14 @@ class Tax_Modifier
                 
             }  
         }
-
-
-        
+        if($this->billing_location == $this->store_location['state'])
+        {
+            $obj_arr = $item_tax_rates;
+            foreach($obj_arr as $tax_obj)
+            {
+                array_push($item_tax_rates,$tax_obj);
+            }
+        }
         // $cart_tax_totals = WC()->cart->get_tax_totals();
         // $arr_keys = array_keys($cart_tax_totals);
         // $arr_val = array_values($cart_tax_totals);
@@ -226,6 +247,7 @@ class Tax_Modifier
     public function store_details()
     {
         $this->store_location =  wc_get_base_location();
+        // $this->set_billing_location();
         // $this->billing_location = $this->store_location['state'];
     }
 
