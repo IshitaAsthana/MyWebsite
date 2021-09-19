@@ -139,13 +139,20 @@ class Tax_Modifier
                     // $this->set_billing_location();
                     if($this->billing_location == $this->store_location['state'])
                     {
-                        $item_tax_rates[$key]['rate'] = $rates->IGSTRate/2;
+                        if($item_tax_rates[$key]['label'] != "IGST")
+                        {
+                            $item_tax_rates[$key]['rate'] = $rates->IGSTRate/2;
+                        }
+                        else
+                        {
+                            $item_tax_rates[$key]['rate'] = $rates->IGSTRate;
+                        }
                         // $item_tax_rates[$key]['label'] = "SGST/CGST";
                     }
                     else
                     {
                         $item_tax_rates[$key]['rate'] = $rates->IGSTRate;
-                        $item_tax_rates[$key]['label'] = "IGST";
+                        // $item_tax_rates[$key]['label'] = "IGST";
                     }
                 }
                 
@@ -263,7 +270,7 @@ class Tax_Modifier
         // {
         //     echo "not contain tax";
         // }
-        // print_r(WC()->cart->get_tax_totals());
+        print_r(WC()->cart->get_tax_totals());
         $hsn = $product->get_meta('hsn_prod_id');
         $qty = $cart_item['quantity'];
         $subtotal = $qty*$product->get_price();
