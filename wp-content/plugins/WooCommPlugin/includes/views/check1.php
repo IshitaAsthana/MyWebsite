@@ -171,11 +171,11 @@ $(document).ready(function(){
 </script> -->
 <?php
 
-echo get_option( 'woocommerce_store_address', '' );
-echo get_option( 'woocommerce_store_address_2', '' );
+// echo get_option( 'woocommerce_store_address', '' );
+// echo get_option( 'woocommerce_store_address_2', '' );
 $state = wc_get_base_location();
-echo $state['state'];
-echo $state['country'];
+// echo $state['state'];
+// echo $state['country'];
 
 ?>
 <?php  
@@ -193,7 +193,7 @@ echo $state['country'];
         $hsn_code = $product->get_meta('hsn_prod_id');
     endwhile;
 
-    echo 'hi';
+    // echo 'hi';
     global $woocommerce, $post;
 
 $order = new WC_Order('19');
@@ -254,3 +254,45 @@ $order = new WC_Order('19');
 //     if(WC()->cart->is_empty())
 //         echo $cart_object
 // }
+
+// $file = fopen(".\\tax_rates.csv", "r");
+// $myFileContents = fread($file, filesize(".\\tax_rates.csv"));
+// echo $myFileContents;
+// // fclose($file);
+// $myFile = plugin_dir_path( __FILE__ ) ."tax_rates.csv";
+// $myFileLink = fopen($myFile, 'r');
+// $myFileContents = fread($myFileLink, filesize($myFile));
+// fclose($myFileLink);
+// // print_r($myFileContents);
+
+// $store_location = wc_get_base_location();
+// // // $store_location =  wc_get_base_location();
+
+// if(!strpos($myFileContents,"CGST")&&!strpos($myFileContents,"SGST")):
+// $state_pos = strpos($myFileContents,$store_location['state']);
+// // echo $state_pos;
+// // echo $myFileContents[157];
+// $len=0;
+// for(;substr($myFileContents,$state_pos+$len,2) != "IN"; $len++);
+// $igst_row = substr($myFileContents,$state_pos,$len);
+// $I = strpos($igst_row,"IGST");
+// // $igst_row[$I] = "S";
+// $sgst_row = substr_replace($igst_row,"S", $I , 1);
+// // $igst_row[$I] = "C";
+// $cgst_row = substr_replace($igst_row,"C", $I , 1);
+// $priority = strpos($cgst_row,"7");
+// $cgst_row = substr_replace($cgst_row,"6", $priority , 1);
+// $cgst_row = "IN,".$cgst_row;
+// $new_row = $sgst_row.$cgst_row;
+// $first = substr($myFileContents,0,$state_pos);
+// $last = substr($myFileContents,$state_pos+$len);
+// // $newFileContent = substr_replace($myFileContents,$new_row, $state_pos , strlen($new_row));
+// $newFileContent = $first.$new_row.$last;
+
+
+// // // $myFile2 = "testFolder/sampleFile2.txt";
+// $myFileLink2 = fopen($myFile, 'w+');
+// // $newContent = substr_replace($myFileContents,"",0,strlen(""));
+// fwrite($myFileLink2, $newFileContent);
+// fclose($myFileLink2);
+// endif;

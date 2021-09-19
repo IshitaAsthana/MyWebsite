@@ -1,7 +1,8 @@
 Country code,State code,Postcode / ZIP,City,Rate %,Tax name,Priority,Compound,Shipping,Tax class
-IN,DL,,,6.0000,IGST,1,0,0,
-IN,MH,,,6.0000,IGST,3,0,0,
-IN,UP,,,6.0000,IGST,6,0,0,
+IN,DL,,,6.0000,IGST,7,0,0,
+IN,MH,,,6.0000,IGST,7,0,0,
+IN,UP,,,6.0000,SGST,7,0,0,
+IN,UP,,,6.0000,CGST,7,0,0,
 IN,AN,,,12.0000,IGST,7,0,0,
 IN,AP,,,12.0000,IGST,7,0,0,
 IN,AR,,,12.0000,IGST,7,0,0,

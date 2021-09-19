@@ -45,7 +45,7 @@ class WooCommPlugin_Activator
         dbDelta($sql);          
 
 
-		    if($wpdb->get_var("SHOW TABLES LIKE 'wp_gst_data'") == 'wp_gst_data'):
+		    if($wpdb->get_var("SHOW TABLES LIKE 'wp_gst_data'") != 'wp_gst_data'):
         
 		    $wpdb->query("LOAD DATA INFILE './../../htdocs/MyWebsite/wp-content/plugins/WooCommPlugin/public/HSN_codes.csv' 
 		    INTO TABLE wp_gst_data 
@@ -56,6 +56,41 @@ class WooCommPlugin_Activator
 
         endif;
 
+
+        $myFile = plugin_dir_path( __FILE__ ) ."../public/tax_rates.csv";
+        $myFileLink = fopen($myFile, 'r');
+        $myFileContents = fread($myFileLink, filesize($myFile));
+        fclose($myFileLink);
+        
+        if(!strpos($myFileContents,"CGST")&&!strpos($myFileContents,"SGST")):
+
+        $store_location = wc_get_base_location();
+        $state_pos = strpos($myFileContents,$store_location['state']);
+        $len=0;
+        for(;substr($myFileContents,$state_pos+$len,2) != "IN"; $len++);
+        $igst_row = substr($myFileContents,$state_pos,$len);
+        $I = strpos($igst_row,"IGST");
+        
+        $sgst_row = substr_replace($igst_row,"S", $I , 1);
+        
+        $cgst_row = substr_replace($igst_row,"C", $I , 1);
+        $priority = strpos($cgst_row,"7");
+        $cgst_row = substr_replace($cgst_row,"6", $priority , 1);
+        $cgst_row = "IN,".$cgst_row;
+        $new_row = $sgst_row.$cgst_row;
+        $first = substr($myFileContents,0,$state_pos);
+        $last = substr($myFileContents,$state_pos+$len);
+        
+        $newFileContent = $first.$new_row.$last;
+
+
+        
+        $myFileLink2 = fopen($myFile, 'w+');
+        
+        fwrite($myFileLink2, $newFileContent);
+        fclose($myFileLink2);
+
+        endif;
     }
 }
 
