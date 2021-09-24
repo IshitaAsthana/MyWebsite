@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) or exit;
 </script>
 <div class="wrap">
 	<div class="icon32" id="icon-options-general"><br /></div>
-	<h2><?php _e( 'Store Policies', 'woocommplugin' ); ?></h2>
+	<h2><?php _e( 'Invoice Settings', 'woocommplugin' ); ?></h2>
 	<h2 class="nav-tab-wrapper">
 	<?php
 	foreach ($settings_tabs as $tab_slug => $tab_title ) {

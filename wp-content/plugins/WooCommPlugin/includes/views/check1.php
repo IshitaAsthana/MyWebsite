@@ -296,3 +296,6 @@ $order = new WC_Order('19');
 // fwrite($myFileLink2, $newFileContent);
 // fclose($myFileLink2);
 // endif;
+
+if(wc_prices_include_tax())
+    echo "include tax";

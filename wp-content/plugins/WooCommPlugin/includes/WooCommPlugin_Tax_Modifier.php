@@ -164,15 +164,20 @@ class Tax_Modifier
     //add checkbox to use GST settings
     public function tax_setting_for_gst($settings)
 	{
-		array_push($settings, array(
+        $res = array_slice($settings, 0, count($settings)-1, true);
+        array_push($res,array(
 			'title'   => __( 'Use default GST', 'woocommerce' ),
 			'desc'    => __( 'Use in-built GST data for tax calculation. You won\'t need to setup woocommerce tax if you tick this box.', 'woocommerce' ),
 			'id'      => 'woocommplugin_use_default_gst',
 			'default' => 'yes',
-			'type'    => 'checkbox',
-		));
-		// include('views/Tax_Sample.php');                //check its output
-		return $settings;
+			'type'    => 'number',
+        ));
+        array_push($res,array(
+            'type' => 'sectionend',
+            'id'   => 'tax_options',
+        ));
+        
+		return $res;
 	}
 
     //store details

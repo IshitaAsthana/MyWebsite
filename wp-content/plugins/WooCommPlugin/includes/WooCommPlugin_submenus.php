@@ -34,8 +34,8 @@ class Submenus
     {
 		
 		// include settings classes
-		$this->TnC = include( 'WooCommPlugin_TnC_submenu.php' );
-		$this->Refund = include( 'WooCommPlugin_Refund_Policy_submenu.php');
+		// $this->TnC = include( 'WooCommPlugin_TnC_submenu.php' );
+		// $this->Refund = include( 'WooCommPlugin_Refund_Policy_submenu.php');
 		$this->Refund1 = include( 'WooCommPlugin_Terms_and_Conditions_post_type.php');
 
 		// Invoice menu item
@@ -46,9 +46,23 @@ class Submenus
 		//Product hsn code
 		add_action('woocommerce_product_options_general_product_data', array( $this , 'add_product_custom_meta_box_hsn_code') );
 		add_action( 'woocommerce_process_product_meta', array($this,'save_hsn_code_field' ));
+		// add_filter( 'woocommerce_tax_settings', array($this, 'tax_menus_allowed') );
 		
     }
 	
+
+	public function tax_menus_allowed($settings)
+	{
+		foreach($settings as $setting)
+		{
+			// if($setting['id'] === 'woocommerce_tax_display_shop')
+			// 	unset( $setting );
+			print_r($setting);
+		}
+		
+		return $settings;
+	}
+
 	public function invoice_settings() 
     {
 		$parent_slug = 'woocommerce';
